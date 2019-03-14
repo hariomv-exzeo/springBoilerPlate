@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/hariomv-exzeo/springdemo:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/hariomv-exzeo/springdemo:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: springdemo
+        chartPath: charts/springdemo
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/hariomv-exzeo/springdemo'
+          image.tag: '{{.DIGEST_HEX}}'
